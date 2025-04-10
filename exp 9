@@ -1,0 +1,203 @@
+//easy problem:
+
+class Course {
+    private String courseName;
+    private int duration;
+
+    public Course(String courseName, int duration) {
+        this.courseName = courseName;
+        this.duration = duration;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public String toString() {
+        return courseName + " (" + duration + " weeks)";
+    }
+}
+
+class Student {
+    private String name;
+    private Course course;
+
+    public Student(String name, Course course) {
+        this.name = name;
+        this.course = course;
+    }
+
+    public void displayStudentInfo() {
+        System.out.println("Student Name: " + name);
+        System.out.println("Enrolled Course: " + course);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Simulated Dependency Injection (manual)
+        Course course = new Course("Spring Framework", 6);
+        Student student = new Student("Alice", course);
+
+        student.displayStudentInfo();
+    }
+}
+
+
+
+//Medium:
+
+import java.util.*;
+
+class Student {
+    private int id;
+    private String name;
+    private int age;
+
+    public Student(int id, String name, int age) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+    }
+
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public int getAge() { return age; }
+
+    public void setName(String name) { this.name = name; }
+    public void setAge(int age) { this.age = age; }
+
+    @Override
+    public String toString() {
+        return "Student{id=" + id + ", name='" + name + "', age=" + age + "}";
+    }
+}
+
+class StudentRepository {
+    private List<Student> students = new ArrayList<>();
+    private int nextId = 1;
+
+    public void create(String name, int age) {
+        students.add(new Student(nextId++, name, age));
+    }
+
+    public Student read(int id) {
+        for (Student s : students) {
+            if (s.getId() == id) return s;
+        }
+        return null;
+    }
+
+    public void update(int id, String newName, int newAge) {
+        Student student = read(id);
+        if (student != null) {
+            student.setName(newName);
+            student.setAge(newAge);
+        }
+    }
+
+    public void delete(int id) {
+        students.removeIf(s -> s.getId() == id);
+    }
+
+    public void listAll() {
+        for (Student s : students) {
+            System.out.println(s);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        StudentRepository repo = new StudentRepository();
+
+        System.out.println("Creating students...");
+        repo.create("Alice", 20);
+        repo.create("Bob", 22);
+        repo.listAll();
+
+        System.out.println("\nUpdating Bob...");
+        repo.update(2, "Bobby", 23);
+        repo.listAll();
+
+        System.out.println("\nDeleting Alice...");
+        repo.delete(1);
+        repo.listAll();
+    }
+}
+
+
+
+//hard:
+
+class Account {
+    private int id;
+    private String name;
+    private double balance;
+
+    public Account(int id, String name, double balance) {
+        this.id = id;
+        this.name = name;
+        this.balance = balance;
+    }
+
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public double getBalance() { return balance; }
+
+    public void deposit(double amount) {
+        balance += amount;
+    }
+
+    public boolean withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return name + " - Balance: $" + balance;
+    }
+}
+
+class BankService {
+    public void transfer(Account from, Account to, double amount) {
+        System.out.println("Initiating transfer of $" + amount + " from " + from.getName() + " to " + to.getName());
+        if (from.withdraw(amount)) {
+            to.deposit(amount);
+            System.out.println("✅ Transaction Successful!");
+        } else {
+            System.out.println("❌ Transaction Failed: Insufficient Balance. Rolling back...");
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Account acc1 = new Account(1, "Alice", 500);
+        Account acc2 = new Account(2, "Bob", 300);
+
+        BankService bank = new BankService();
+
+        System.out.println("Initial Balances:");
+        System.out.println(acc1);
+        System.out.println(acc2);
+
+        System.out.println("\nAttempting valid transfer:");
+        bank.transfer(acc1, acc2, 200);
+        System.out.println(acc1);
+        System.out.println(acc2);
+
+        System.out.println("\nAttempting invalid transfer (insufficient funds):");
+        bank.transfer(acc2, acc1, 1000);
+        System.out.println(acc1);
+        System.out.println(acc2);
+    }
+}
